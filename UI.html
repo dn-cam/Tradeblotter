@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Trade Blotter System</title>
+<link rel="stylesheet" href="blotter.css">
+</head>
+<body>
+
+<center>
+<h1>Trade Blotter System</h1>
+<form id="form">
+<table id = "MainTable">
+ <tr>
+    <th></th>
+    <th>Trader 1</th>
+    <th>Trader 2</th>
+  </tr>
+  <tr>
+    <td>Date</td>
+    <td colspan="2"><input type="date" id="date" name="Date" class="date"></td>
+  </tr>
+
+  <tr>
+    <td>Ticker</td>
+    <td class="ticker" >
+       <select id="ticker1">
+            <option disabled selected value> -- select an option -- </option>
+            <option value="SPY Equity">SPY Equity</option>
+            <option value="QQQ Equity">QQQ Equity</option>
+            <option value="HYG Equity">HYG Equity</option>
+       </select>
+    </td>
+    <td class="ticker" >
+       <select id="ticker2">
+            <option disabled selected value> -- select an option -- </option>
+            <option value="SPY Equity">SPY Equity</option>
+            <option value="QQQ Equity">QQQ Equity</option>
+            <option value="HYG Equity">HYG Equity</option>
+       </select>
+    </td>
+  </tr>
+  <tr>
+    <td>Side</td>
+    <td >
+       <select id="side1">
+            <option disabled selected value> -- select an option -- </option>
+            <option value="1">Buy</option>
+            <option value="2">Sell</option>
+       </select>
+    </td>
+    <td >
+       <select id="side2">
+            <option disabled selected value> -- select an option -- </option>
+            <option value="1">Buy</option>
+            <option value="2">Sell</option>
+       </select>
+    </td>
+  </tr>
+  <tr>
+    <td># of contract</td>
+    <td><input type="number" id="contract1" min="0" max="200"></td>
+    <td><input type="number" id="contract2" min="0" max="200"></td>
+  </tr>
+  <tr>
+    <td>% of Position</td>
+    <td><span class="position"><input type="number" max="100" accuracy="2" min="0" id="position1">%</span></td>
+    <td><span class="position"><input type="number" max="100" accuracy="2" min="0" id="position2">%</span></td>
+  </tr>
+</table>
+<br/>
+<button type="button" onclick="myFunction()" id = "sendOrder">Send Order</button>
+</form>
+<br/>
+<button type="button" onclick="myFunction1()" id = "viewPosition">View Position</button>
+<div id="positionData"></div>
+
+<script>
+
+    function myFunction() {
+        var date = document.getElementById("date").value
+        var ticker1 = document.getElementById("ticker1").value
+        var ticker2 = document.getElementById("ticker2").value
+        var side1 = document.getElementById("side1").value
+        var side2 = document.getElementById("side2").value
+        var contract1 = document.getElementById("contract1").value
+        var contract2 = document.getElementById("contract2").value
+        var position1 = document.getElementById("position1").value
+        var position2 = document.getElementById("position2").value
+        var jsonObj = { "0":[
+                      {"trader":"1", "date": date, "ticker": ticker1, "side": side1, "contract":contract1, "position":position1},
+                      {"trader":"2", "date": date, "ticker": ticker2, "side": side2, "contract":contract2, "position":position2}
+                    ]
+                  };
+        var trade = JSON.stringify(jsonObj);
+        console.log(trade)
+        fetch('http://127.0.0.1:5002/placeOrder', {
+              method: 'post',
+              body: trade
+            })
+        .then(function(response){
+            console.log(response.json);
+            document.getElementById("show").innerHTML = response;});
+    }
+
+    function myFunction1() {
+
+        const url = 'http://127.0.0.1:5002/getPosition';
+        fetch(url)
+        .then((resp) => resp.json()) // Transform the data into json
+        .then(function(data) {
+          appendData(data);
+        })
+        .catch(function (err) {
+          console.log('error: ' + err);
+        });
+    }
+
+    function appendData(data){
+      var mainContainer = document.getElementById("positionData");
+      for (var i = 0; i < data.length; i++) {
+          var div = document.createElement("div");
+          div.innerHTML = 'Ticker: ' + data[i].ticker + ' Position: ' + data[i].position;
+          mainContainer.appendChild(div);
+      }
+    }
+
+</script>
+
+<div id="text1"></div>
+</center>
+</body>
+</html>
